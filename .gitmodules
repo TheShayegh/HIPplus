@@ -1,0 +1,3 @@
+[submodule "benchmark_llm_summarization"]
+	path = benchmark_llm_summarization
+	url = https://github.com/Tiiiger/benchmark_llm_summarization
