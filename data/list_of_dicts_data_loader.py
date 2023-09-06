@@ -35,7 +35,12 @@ class ListOfDictsDataLoader:
     return len(self._data)
 
   def __getitem__(self, key):
-    return self._data[key]
+    if type(key) is str:
+      return [d[key] for d in self._data]
+    elif type(key) is int:
+      return self._data[key]
+    else:
+      return ListOfDictsDataLoader.from_json([{k: d[k] for k in key} for d in self._data])
 
   def random(self):
     return self._data[random.randint(0, len(self)-1)]
@@ -46,6 +51,8 @@ class ListOfDictsDataLoader:
   def group_by(self, keys):
     return [self.filter_by(**{key: [k] for key,k in zip(keys, ks[:-1])}) for ks in product(*[self.key_values(key) for key in keys], [None])]
 
+  def drop_duplicates(self):
+    return ListOfDictsDataLoader.from_json([dict(t) for t in {tuple(d.items()) for d in self._data}])
 
   class ComparisonTuplesIterator:
     def __init__(self, data, same, size):
@@ -68,10 +75,10 @@ class ListOfDictsDataLoader:
           return False
       self.indices = combinations(range(len(self.this_group)), self.size)
       return True
-      
+
     def __next__(self):
       try:
-        return [self.this_group[i] for i in next(self.indices)]
+        return ListOfDictsDataLoader.from_json([self.this_group[i] for i in next(self.indices)])
       except StopIteration:
         if self.next_group():
           return next(self)
